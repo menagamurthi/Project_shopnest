@@ -7,7 +7,7 @@ const ProductCard = ({ product }) => {
       <CardMedia
         component="img"
         height="200"
-        image={`http://localhost:5001${product.image}`}
+        image={`http://localhost:5000${product.image.replace(/\\/g, '/')}`}
         alt={product.name}
         sx={{ objectFit: 'cover' }}
       />

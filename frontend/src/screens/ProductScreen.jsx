@@ -8,14 +8,14 @@ const ProductScreen = () => {
   const [product, setProduct] = useState(null)
 
   useEffect(() => {
-    axios.get(`http://localhost:5001/api/products/${id}`)
-      .then(({ data }) => setProduct(data))
+   axios.get(`http://localhost:5000/api/products/${id}`)
+     .then(({ data }) => setProduct(data))
   }, [id])
 
   if(!product) return <h2>Loading...</h2>
 
-  // KEY: Add backend URL + fix backslash
-  const imageUrl = `http://localhost:5001${product.image.replace(/\\/g, '/')}`
+  // KEY: Add backend URL + fix backslash. Use 5000 everywhere
+  const imageUrl = `http://localhost:5000${product.image.replace(/\\/g, '/')}`
 
   return (
     <>
@@ -36,7 +36,7 @@ const ProductScreen = () => {
           <Card>
             <ListGroup variant='flush'>
               <ListGroup.Item><Row><Col>Price:</Col><Col><strong>₹{product.price}</strong></Col></Row></ListGroup.Item>
-              <ListGroup.Item><Row><Col>Status:</Col><Col>In Stock ({product.countInStock})</Col></Row></ListGroup.Item>
+              <ListGroup.Item><Row><Col>Status:</Col><Col>{product.countInStock > 0? `In Stock (${product.countInStock})` : 'Out Of Stock'}</Col></Row></ListGroup.Item>
               <ListGroup.Item>
                 <Button className='w-100' disabled={product.countInStock === 0}>
                   ADD TO CART

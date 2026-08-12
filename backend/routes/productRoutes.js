@@ -1,27 +1,21 @@
 import express from 'express';
-import { protect, admin } from '../middleware/authMiddleware.js'; // 1. ADD THIS
-import upload from '../middleware/upload.js'; // 2. use your middleware file only
-
-import { 
-  getProducts, 
-  getProductById, 
-  createProduct, 
-  updateProduct, 
-  deleteProduct 
-} from '../controllers/productController.js';
-
+import Product from '../models/Product.js';
 const router = express.Router();
 
-// @route   GET /api/products  - Public
-// @route   POST /api/products - Admin only
-router.route('/').get(getProducts).post(protect, admin, upload.single('image'), createProduct);
+// GET all products
+router.get('/', async (req, res) => {
+  const products = await Product.find({});
+  res.json(products);
+});
 
-// @route   GET /api/products/:id - Public
-// @route   PUT /api/products/:id - Admin only
-// @route   DELETE /api/products/:id - Admin only
-router.route('/:id')
-  .get(getProductById)
-  .put(protect, admin, upload.single('image'), updateProduct)
-  .delete(protect, admin, deleteProduct);
+// GET single product by ID - THIS IS PROBABLY MISSING
+router.get('/:id', async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if(product) {
+    res.json(product);
+  } else {
+    res.status(404).json({ message: 'Product not found' });
+  }
+});
 
 export default router;
