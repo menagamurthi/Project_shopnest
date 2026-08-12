@@ -14,7 +14,7 @@ const AdminOrders = () => {
     const fetchOrders = async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-        const { data } = await axios.get('http://localhost:5001/api/orders', config);
+        const { data } = await axios.get('http://localhost:5000/api/orders', config);
         setOrders(data);
         setLoading(false);
       } catch (err) {
@@ -28,7 +28,7 @@ const AdminOrders = () => {
   const updateOrderStatus = async (id, status) => {
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.put(`http://localhost:5001/api/orders/${id}`, { status }, config);
+      await axios.put(`http://localhost:5000/api/orders/${id}`, { status }, config);
       setOrders(orders.map(o => o._id === id ? {...o, status} : o));
     } catch (err) {
       alert('Failed to update status');

@@ -27,7 +27,7 @@ const __dirname = path.dirname(__filename);
 
 // STATIC UPLOADS - ONLY ONCE
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
+app.use('/images', express.static(path.join(__dirname, 'images')))
 app.get('/', (req, res) => res.send('API is running'));
 
 // ROUTES
@@ -51,5 +51,5 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/shopnest')
 .then(() => console.log('MongoDB Connected'))
 .catch(err => console.log(err));
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));

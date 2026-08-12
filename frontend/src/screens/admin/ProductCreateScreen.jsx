@@ -69,7 +69,7 @@ const ProductCreateScreen = () => {
     <Typography variant="caption" display="block" gutterBottom>Preview:</Typography>
     <Paper sx={{p:1, display: 'inline-block'}}>
       <img 
-        src={`http://localhost:5001${image}`} 
+        src={`http://localhost:5000${image}`} 
         alt="preview" 
         style={{width: '150px', height: '150px', objectFit: 'cover', borderRadius: '8px'}} 
       />

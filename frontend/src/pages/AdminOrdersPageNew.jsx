@@ -9,7 +9,7 @@ const AdminOrdersPage = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.get('http://localhost:5001/api/orders', config);
+      const { data } = await axios.get('http://localhost:5000/api/orders', config);
       setOrders(data);
       setLoading(false);
     } catch (err) {
@@ -27,7 +27,7 @@ const AdminOrdersPage = () => {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       
-      await axios.put(`http://localhost:5001/api/orders/deliver/${id}`, {}, config); 
+      await axios.put(`http://localhost:5000/api/orders/deliver/${id}`, {}, config); 
       
       // NEW: Don't fetch. Just update the state directly
       setOrders(prevOrders => 

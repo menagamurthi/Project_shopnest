@@ -9,7 +9,7 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null)
 
   useEffect(() => {
-    axios.get(`http://localhost:5001/api/products/${id}`)
+    axios.get(`http://localhost:5000/api/products/${id}`)
       .then(({ data }) => setProduct(data))
       .catch(err => console.log(err))
   }, [id])
@@ -17,7 +17,7 @@ const ProductDetails = () => {
   if(!product) return <h2>Loading...</h2>
 
   // FIX: Add backend URL + fix windows backslash \ to /
-  const imageUrl = `http://localhost:5001${product.image.replace(/\\/g, '/')}`
+  const imageUrl = `http://localhost:5000${product.image.replace(/\\/g, '/')}`
 
   return (
     <div style={{padding: '20px'}}>
