@@ -7,12 +7,14 @@ import jwt from 'jsonwebtoken';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import User from './models/User.js';
+import User from './models/userModel.js';
 import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+
+
 
 dotenv.config();
 console.log("KEY:", process.env.RAZORPAY_KEY_ID);

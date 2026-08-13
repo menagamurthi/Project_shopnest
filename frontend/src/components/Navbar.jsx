@@ -1,12 +1,13 @@
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext'; // <-- ADD THIS
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+  const { userInfo, logout } = useAuth(); // <-- USE CONTEXT INSTEAD OF localStorage
 
   const logoutHandler = () => {
-    localStorage.removeItem('userInfo');
+    logout(); // <-- this will clear both context + localStorage
     navigate('/login');
   }
 
@@ -25,7 +26,7 @@ export default function Navbar() {
             <>
               <Button color="inherit" onClick={() => navigate('/myorders')}>My Orders</Button>
               
-              {/* ADMIN BUTTONS - FIXED: only check userInfo.user.isAdmin once */}
+              {/* ADMIN BUTTONS */}
               {userInfo?.user?.isAdmin && (
                 <>
                   <Button color="inherit" component={Link} to="/admin">Dashboard</Button>

@@ -2,20 +2,31 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { 
+  Box, Button, Typography, Paper, IconButton, 
+  Table, TableBody, TableCell, TableContainer, 
+  TableHead, TableRow, CircularProgress
+} from '@mui/material';
+import { Edit, Delete, Add } from '@mui/icons-material';
+import { toast } from 'react-toastify';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const { userInfo } = useAuth();
   const navigate = useNavigate();
 
+  const isAdmin = userInfo?.user?.isAdmin || userInfo?.isAdmin;
+
   useEffect(() => {
-    if (!userInfo || !userInfo.isAdmin) {
+    if (!userInfo) {
       navigate('/login');
+    } else if (!isAdmin) {
+      navigate('/');
+    } else {
+      fetchProducts();
     }
-    fetchProducts();
-  }, [userInfo, navigate]);
+  }, [userInfo, isAdmin, navigate]);
 
   const fetchProducts = async () => {
     try {
@@ -23,21 +34,20 @@ const AdminProducts = () => {
       setProducts(data);
       setLoading(false);
     } catch (err) {
-      setError('Failed to fetch products');
+      toast.error('Failed to fetch products');
       setLoading(false);
     }
   };
 
   const createProductHandler = async () => {
-    if (window.confirm('Are you sure you want to create a sample product?')) {
+    if (window.confirm('Create a sample product?')) {
       try {
-        const config = {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        };
+        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
         await axios.post(`/api/products`, {}, config);
-        fetchProducts(); // refresh list
+        toast.success('Product Created');
+        fetchProducts();
       } catch (err) {
-        alert(err.response?.data?.message || 'Failed to create product');
+        toast.error(err.response?.data?.message || 'Failed');
       }
     }
   };
@@ -45,61 +55,62 @@ const AdminProducts = () => {
   const deleteHandler = async (id) => {
     if (window.confirm('Are you sure?')) {
       try {
-        const config = {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        };
+        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
         await axios.delete(`/api/products/${id}`, config);
-        fetchProducts(); // refresh list
+        toast.success('Product Deleted');
+        fetchProducts();
       } catch (err) {
-        alert(err.response?.data?.message || 'Failed to delete product');
+        toast.error(err.response?.data?.message || 'Failed');
       }
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (!userInfo || !isAdmin) return <p>Redirecting...</p>;
+  if (loading) return <Box sx={{display:'flex', justifyContent:'center', mt:5}}><CircularProgress /></Box>;
 
   return (
-    <div style={{ padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Products</h1>
-        <button onClick={createProductHandler} style={{ padding: '10px 15px', cursor: 'pointer', background: '#007bff', color: 'white', border: 'none', borderRadius: '5px' }}>
-          + Create Product
-        </button>
-      </div>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+        <Typography variant="h4">Products</Typography>
+        <Button variant="contained" startIcon={<Add />} onClick={createProductHandler}>
+          Create Product
+        </Button>
+      </Box>
 
-      <table style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ background: '#f4f4f4' }}>
-            <th style={{ padding: '10px', border: '1px solid #ddd' }}>ID</th>
-            <th style={{ padding: '10px', border: '1px solid #ddd' }}>NAME</th>
-            <th style={{ padding: '10px', border: '1px solid #ddd' }}>PRICE</th>
-            <th style={{ padding: '10px', border: '1px solid #ddd' }}>CATEGORY</th>
-            <th style={{ padding: '10px', border: '1px solid #ddd' }}>BRAND</th>
-            <th style={{ padding: '10px', border: '1px solid #ddd' }}>ACTIONS</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => (
-            <tr key={product._id}>
-              <td style={{ padding: '10px', border: '1px solid #ddd' }}>{product._id}</td>
-              <td style={{ padding: '10px', border: '1px solid #ddd' }}>{product.name}</td>
-              <td style={{ padding: '10px', border: '1px solid #ddd' }}>₹{product.price}</td>
-              <td style={{ padding: '10px', border: '1px solid #ddd' }}>{product.category}</td>
-              <td style={{ padding: '10px', border: '1px solid #ddd' }}>{product.brand}</td>
-              <td style={{ padding: '10px', border: '1px solid #ddd' }}>
-                <Link to={`/admin/product/${product._id}/edit`}>
-                  <button style={{ marginRight: '10px', cursor: 'pointer' }}>Edit</button>
-                </Link>
-                <button style={{ cursor: 'pointer', background: 'red', color: 'white', border: 'none' }} onClick={() => deleteHandler(product._id)}>
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
+            <TableRow>
+              <TableCell><b>ID</b></TableCell>
+              <TableCell><b>NAME</b></TableCell>
+              <TableCell><b>PRICE</b></TableCell>
+              <TableCell><b>CATEGORY</b></TableCell>
+              <TableCell><b>BRAND</b></TableCell>
+              <TableCell align="center"><b>ACTIONS</b></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {products.map((product) => (
+              <TableRow key={product._id} hover>
+                <TableCell>{product._id}</TableCell>
+                <TableCell>{product.name}</TableCell>
+                <TableCell>₹{product.price}</TableCell>
+                <TableCell>{product.category}</TableCell>
+                <TableCell>{product.brand}</TableCell>
+                <TableCell align="center">
+                  <IconButton color="primary" component={Link} to={`/admin/product/${product._id}/edit`}>
+                    <Edit />
+                  </IconButton>
+                  <IconButton color="error" onClick={() => deleteHandler(product._id)}>
+                    <Delete />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };
 

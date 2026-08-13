@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
-import Order from '../models/Order.js'; // <-- KEEP ONLY THIS ONE
+import Order from "../models/orderModel.js";
+import Product from "../models/productModel.js"; // if you use it
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
@@ -12,7 +13,7 @@ const razorpay = new Razorpay({
 
 // @desc    Create new order
 const createOrder = asyncHandler(async (req, res) => {
-  const { orderItems, shippingAddress, paymentMethod, itemsPrice, totalPrice } = req.body
+  const { orderItems, shippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice } = req.body
 
   if (orderItems && orderItems.length === 0) {
     res.status(400)
@@ -24,8 +25,26 @@ const createOrder = asyncHandler(async (req, res) => {
       shippingAddress,
       paymentMethod,
       itemsPrice,
+      taxPrice,
+      shippingPrice,
       totalPrice,
+      isPaid: paymentMethod === "COD"? false : true,
+      paidAt: paymentMethod === "COD"? null : Date.now()
     })
+
+    // ===== REDUCE STOCK =====
+    for (const item of orderItems) {
+      const product = await Product.findById(item.product)
+      if (product) {
+        if(product.countInStock < item.qty) {
+          res.status(400)
+          throw new Error(`${product.name} only has ${product.countInStock} in stock`)
+        }
+        product.countInStock -= item.qty
+        await product.save()
+      }
+    }
+    // ========================
 
     const createdOrder = await order.save()
     res.status(201).json(createdOrder)
@@ -55,7 +74,6 @@ const getOrderById = asyncHandler(async (req, res) => {
 });
 
 // @desc    Create Razorpay Order
-// @desc    Create Razorpay Order
 const createRazorpayOrder = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
   if (!order) {
@@ -64,14 +82,13 @@ const createRazorpayOrder = asyncHandler(async (req, res) => {
   }
 
   const options = {
-    amount: order.totalPrice * 100, // in paise
+    amount: order.totalPrice * 100,
     currency: "INR",
     receipt: order._id.toString(),
   };
 
   const razorpayOrder = await razorpay.orders.create(options);
   
-  // USE findByIdAndUpdate instead of order.save() to avoid validation
   await Order.findByIdAndUpdate(
     req.params.id,
     { razorpayOrderId: razorpayOrder.id },
@@ -81,17 +98,11 @@ const createRazorpayOrder = asyncHandler(async (req, res) => {
   res.json(razorpayOrder);
 });
 
-
-// @desc    Verify Payment
-// @desc    Verify Payment
 // @desc    Verify Payment
 const verifyPayment = asyncHandler(async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-  console.log("Verify called with:", razorpay_payment_id);
-
   const order = await Order.findById(req.params.id);
-
   if (!order) {
     res.status(404);
     throw new Error('Order not found');
@@ -111,10 +122,8 @@ const verifyPayment = asyncHandler(async (req, res) => {
           email_address: req.user?.email || 'test@test.com',
         }
       },
-      { new: true } // return updated order
+      { new: true }
     );
-    
-    console.log("Test payment success");
     return res.json(updatedOrder);
   } 
   
@@ -152,10 +161,30 @@ const getOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find({}).populate('user', 'id name');
   res.json(orders);
 });
+// @desc    Cancel order
+// @route   DELETE /api/orders/:id
+// @access  Private
+const cancelOrder = async (req, res) => {
+  try{
+    const order = await Order.findById(req.params.id);
+    if(!order) return res.status(404).json({message: "Order not found"});
+
+    if(order.user.toString() !== req.user._id.toString() && !req.user.isAdmin){
+      return res.status(401).json({message: "Not authorized"})
+    }
+    if(order.isPaid){
+      return res.status(400).json({message: "Cannot cancel paid order"})
+    }
+    await order.deleteOne();
+    res.json({message: "Order cancelled"})
+  }catch(err){
+    res.status(500).json({message: err.message})
+  }
+}
+
 
 const updateOrderToDelivered = asyncHandler(async (req, res) => {
   const { status } = req.body;
-  console.log("Updating order:", req.params.id, "to status:", status);
   
   const updateFields = { status };
   
@@ -167,7 +196,7 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
   const order = await Order.findByIdAndUpdate(
     req.params.id,
     updateFields,
-    { new: true, runValidators: false } // <-- KEY: skip full validation
+    { new: true, runValidators: false }
   );
 
   if (order) {
@@ -177,13 +206,4 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
     throw new Error('Order not found');
   }
 });
-
-export {
-  createOrder,
-  getOrders,
-  getOrderById,
-  getMyOrders,
-  updateOrderToDelivered,
-  createRazorpayOrder,
-  verifyPayment
-}
+export { createOrder, getOrders, updateOrderToDelivered, getOrderById, getMyOrders, createRazorpayOrder, verifyPayment, cancelOrder }

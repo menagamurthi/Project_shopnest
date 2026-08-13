@@ -1,31 +1,29 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState } from 'react'; 
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Container, TextField, Button, Typography, Box, Paper } from '@mui/material';
+import { toast } from 'react-toastify'
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login, userInfo } = useAuth(); // get userInfo from context
+  const { login } = useAuth();
 
-  // If already logged in, kick to correct page
-  useEffect(() => {
-    if (userInfo) {
-      if(userInfo.user?.isAdmin) {
-        navigate('/admin/products');
-      } else {
-        navigate('/');
-      }
-    }
-  }, [userInfo, navigate]);
+  // NO useEffect AT ALL
 
   const submitHandler = async (e) => {
     e.preventDefault();
     setError('');
     try {
-      await login(email, password); // This will update userInfo and trigger useEffect above
+      const data = await login(email, password);
+      toast.success('Logged in')
+      if(data.user?.isAdmin) {
+        navigate('/admin/products');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     }

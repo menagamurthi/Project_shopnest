@@ -1,63 +1,79 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Container, Grid, TextField, MenuItem, Typography, Box } from '@mui/material'
+import ProductCard from '../components/ProductCard'
 
 const Home = () => {
   const [products, setProducts] = useState([]);
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState(['All']); // <-- NEW
+  const [keyword, setKeyword] = useState('');
+  const [category, setCategory] = useState('All');
 
-  // Fetch products whenever search or category changes
+  // Fetch categories from DB on load
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data } = await axios.get('/api/products/categories')
+        setCategories(data)
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data } = await axios.get(`/api/products?search=${search}&category=${category}`);
+        const { data } = await axios.get(
+          `/api/products?keyword=${keyword}&category=${category}`
+        );
         setProducts(data);
       } catch (error) {
         console.log(error);
       }
     };
     fetchProducts();
-  }, [search, category]);
+  }, [keyword, category]);
 
   return (
-    <div className="container mx-auto p-4">
+    <Container sx={{ py: 4 }}>
+      <Typography variant="h4" sx={{ mb: 3 }}>Products</Typography>
       
-      {/* SEARCH + FILTER UI - Put this ABOVE your product grid */}
-      <div className="flex gap-2 mb-4">
-        <input 
-          type="text" 
-          placeholder="Search products..." 
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border p-2 w-full rounded"
+      {/* SEARCH + FILTER */}
+      <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
+        <TextField 
+          fullWidth
+          label="Search products..." 
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
         />
-        <select 
+        <TextField 
+          select
+          label="Category"
           value={category} 
-          onChange={(e) => setCategory(e.target.value)} 
-          className="border p-2 rounded"
+          onChange={(e) => setCategory(e.target.value)}
+          sx={{ minWidth: 200 }}
         >
-          <option value="">All Categories</option>
-          <option value="Electronics">Electronics</option>
-          <option value="Clothes">Clothes</option>
-          <option value="Accessories">Accessories</option>
-        </select>
-      </div>
+          {categories.map(cat => ( // <-- LOOP FROM DB
+            <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+          ))}
+        </TextField>
+      </Box>
 
-      {/* YOUR PRODUCT GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {/* PRODUCT GRID */}
+      <Grid container spacing={3}>
         {products.length === 0 ? (
-          <p>No products found</p>
+          <Typography sx={{ml: 2}}>No products found</Typography>
         ) : (
           products.map(product => (
-            <div key={product._id} className="border p-4 rounded">
-              <img src={product.image} alt={product.name} className="h-40 w-full object-cover mb-2" />
-              <h2 className="font-bold">{product.name}</h2>
-              <p>₹{product.price}</p>
-            </div>
+            <Grid item key={product._id} xs={12} sm={6} md={4} lg={3}>
+              <ProductCard product={product} />
+            </Grid>
           ))
         )}
-      </div>
-    </div>
+      </Grid>
+    </Container>
   )
 }
 export default Home;

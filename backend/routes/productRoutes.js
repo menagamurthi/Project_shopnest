@@ -1,21 +1,17 @@
 import express from 'express';
-import Product from '../models/Product.js';
+import Product from "../models/productModel.js";
+import { protect, admin } from '../middleware/authMiddleware.js';
+import { createProduct, updateProduct, deleteProduct, getProducts, getProductById, getCategories } from '../controllers/productController.js';
+
 const router = express.Router();
 
-// GET all products
-router.get('/', async (req, res) => {
-  const products = await Product.find({});
-  res.json(products);
-});
+// CREATE + GET ALL
+router.route('/').post(protect, admin, createProduct).get(getProducts);
 
-// GET single product by ID - THIS IS PROBABLY MISSING
-router.get('/:id', async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  if(product) {
-    res.json(product);
-  } else {
-    res.status(404).json({ message: 'Product not found' });
-  }
-});
+// GET categories
+router.get('/categories', getCategories);
+
+// GET ONE + UPDATE + DELETE - ONLY ONCE
+router.route('/:id').get(getProductById).put(protect, admin, updateProduct).delete(protect, admin, deleteProduct);
 
 export default router;

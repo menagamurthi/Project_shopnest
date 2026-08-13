@@ -1,33 +1,43 @@
 import React from 'react'; 
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom'; // REMOVED Navigate
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import Navbar from './components/Navbar'; 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useAuth } from './context/AuthContext'; 
-import { CartProvider } from './context/CartContext'; // 1. Import CartProvider
+import { CartProvider } from './context/CartContext';
 
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home'; 
-import CartScreen from './screens/CartScreen'; // 2. Use this one
+import CartScreen from './pages/CartScreen';
 import ProductDetails from './pages/ProductDetails';
 import MyOrders from './pages/MyOrders';
 import OrderDetails from './pages/OrderDetails';
-import PlaceOrder from './pages/PlaceOrder'; 
+import CheckoutPage from './pages/CheckoutPage'; 
 import AdminOrders from './pages/AdminOrders' 
 import AdminProducts from './pages/AdminProducts' 
 import AdminDashboard from './pages/AdminDashboard'
+import ProductEditScreen from './screens/admin/ProductEditScreen';
+
+
+const AdminRoute = ({ children }) => {
+  const { userInfo } = useAuth();
+  const isAdmin = userInfo?.user?.isAdmin || userInfo?.isAdmin;
+  
+  // NO REDIRECT. JUST SHOW OR HIDE
+  if (!userInfo) return <div style={{padding:20}}>Please Login First</div>;
+  if (!isAdmin) return <div style={{padding:20}}>Not Admin</div>;
+  
+  return children;
+};
 
 const theme = createTheme();
 
 function App() {
-  const { userInfo } = useAuth();
-  const isAdmin = userInfo?.user?.isAdmin;
-
   return (
-    <CartProvider> {/* 3. Wrap everything */}
+    <CartProvider>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Navbar />
@@ -37,28 +47,17 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/cart" element={<CartScreen />} /> {/* 4. Only this one */}
-          <Route path="/placeorder" element={<PlaceOrder />} />
+          <Route path="/cart" element={<CartScreen />} />
+          <Route path='/checkout' element={<CheckoutPage />} />
           <Route path="/order/:id" element={<OrderDetails />} />
           <Route path="/myorders" element={<MyOrders />} />
-          
-          {/* Admin Routes */}
-          <Route 
-            path="/admin" 
-            element={isAdmin ? <AdminDashboard /> : <Navigate to="/login" replace />} 
-          />
-          <Route 
-            path="/admin/orders" 
-            element={isAdmin ? <AdminOrders /> : <Navigate to="/login" replace />} 
-          />
-          <Route 
-            path="/admin/products" 
-            element={isAdmin ? <AdminProducts /> : <Navigate to="/login" replace />} 
-          />
+          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+          <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
+		  <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/product/:id/edit" element={<AdminRoute><ProductEditScreen /></AdminRoute>} />
         </Routes>
       </ThemeProvider>
     </CartProvider>
   );
 }
-
 export default App;

@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { useCart } from '../context/CartContext'; 
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useCart } from '../context/CartContext'
+import { toast } from 'react-toastify'
 import axios from 'axios'
+import { Container, Grid, Typography, Button, Box, Chip, Divider, TextField } from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 const ProductDetails = () => {
   const { id } = useParams()
-    const { addToCart } = useCart(); 
+  const { addToCart } = useCart()
+  const navigate = useNavigate()
   const [product, setProduct] = useState(null)
+  const [qty, setQty] = useState(1)
 
   useEffect(() => {
     axios.get(`http://localhost:5000/api/products/${id}`)
@@ -14,39 +19,69 @@ const ProductDetails = () => {
       .catch(err => console.log(err))
   }, [id])
 
-  if(!product) return <h2>Loading...</h2>
+  if(!product) return <Typography sx={{p:4}}>Loading...</Typography>
 
-  // FIX: Add backend URL + fix windows backslash \ to /
   const imageUrl = `http://localhost:5000${product.image.replace(/\\/g, '/')}`
 
+  const addToCartHandler = () => {
+    addToCart({...product, qty})
+    toast.success(`${product.name} added to cart`)
+    navigate('/cart')
+  }
+
   return (
-    <div style={{padding: '20px'}}>
-      <Link to='/' style={{textDecoration: 'none'}}>BACK TO SHOP</Link>
+    <Container sx={{py: 4}}>
+      <Button component={Link} to='/' startIcon={<ArrowBackIcon />}>BACK TO SHOP</Button>
       
-      <div style={{display: 'flex', gap: '30px', marginTop: '20px'}}>
-        
-        <div style={{flex: 1}}>
-          <img src={imageUrl} alt={product.name} style={{width: '100%', borderRadius: '8px'}} />
-        </div>
+      <Grid container spacing={4} sx={{mt: 1}}>
+        <Grid item md={6}>
+          <Box component="img" src={imageUrl} alt={product.name} sx={{width: '100%', borderRadius: 2}} />
+        </Grid>
 
-        <div style={{flex: 1}}>
-          <h2>{product.name}</h2>
-          <h3 style={{color: 'blue'}}>₹{product.price}</h3>
-          <p><strong>Description:</strong> {product.description}</p>
-          <p><strong>Category:</strong> {product.category}</p>
-          <p><strong>Status:</strong> {product.countInStock > 0 ? `In Stock (${product.countInStock})` : 'Out Of Stock'}</p>
-          
-          <button 
-            disabled={product.countInStock === 0}
-            style={{padding: '10px 20px', width: '100%', cursor: product.countInStock === 0 ? 'not-allowed' : 'pointer'}}
-			 onClick={() => addToCart(product, 1)}
-          >
-            {product.countInStock === 0 ? 'OUT OF STOCK' : 'ADD TO CART'}
-          </button>
-        </div>
+        <Grid item md={3}>
+          <Typography variant="h4">{product.name}</Typography>
+          <Divider sx={{my: 2}} />
+          <Typography variant="body1" sx={{mb: 2}}>{product.description}</Typography>
+          <Typography variant="body2"><strong>Category:</strong> {product.category}</Typography>
+        </Grid>
 
-      </div>
-    </div>
+        <Grid item md={3}>
+          <Box sx={{border: '1px solid #ddd', p: 2, borderRadius: 2}}>
+            <Typography variant="h5" sx={{mb: 2}}>₹{product.price}</Typography>
+            <Typography sx={{mb: 2}}>
+              <strong>Status:</strong> 
+              <Chip label={product.countInStock > 0 ? `In Stock` : 'Out Of Stock'} 
+                    color={product.countInStock > 0 ? 'success' : 'error'} size="small" sx={{ml:1}}/>
+            </Typography>
+
+            {product.countInStock > 0 && (
+              <TextField
+                select
+                label="Qty"
+                value={qty}
+                onChange={(e) => setQty(Number(e.target.value))}
+                SelectProps={{ native: true }}
+                fullWidth
+                sx={{mb: 2}}
+              >
+                {[...Array(product.countInStock).keys()].map((x) => (
+                  <option key={x + 1} value={x + 1}>{x + 1}</option>
+                ))}
+              </TextField>
+            )}
+
+            <Button 
+              variant="contained" 
+              fullWidth
+              disabled={product.countInStock === 0}
+              onClick={addToCartHandler}
+            >
+              {product.countInStock === 0 ? 'OUT OF STOCK' : 'ADD TO CART'}
+            </Button>
+          </Box>
+        </Grid>
+      </Grid>
+    </Container>
   )
 }
 

@@ -33,7 +33,7 @@ javascriptShopNest/
     └── package.json
 	
 roductDetails.jsx goes in Frontend folder only. Here’s your full folder structure so there’s no confusion:1. Backend Folder Structure
-This runs on localhost:5001javascriptmern-ecom-backend/
+This runs on localhost:5000javascriptmern-ecom-backend/
 ├── node_modules/
 ├── controllers/
 │   └── productController.js   <-- GET /api/products/:id is here
@@ -44,7 +44,7 @@ This runs on localhost:5001javascriptmern-ecom-backend/
 ├── config/
 │   └── db.js
 ├── seedData.js
-├── server.js                  <-- app.listen(5001)
+├── server.js                  <-- app.listen(0)
 ├── .env
 └── package.jsonBackend job: Just give data with GET /api/products/:id2. Frontend Folder Structure
 This runs on localhost:5174javascriptmern-ecom-frontend/
