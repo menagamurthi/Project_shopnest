@@ -6,6 +6,7 @@ import axios from 'axios'
 import { Container, Grid, Typography, Button, Box, Chip, Divider, TextField } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 const API_URL = import.meta.env.VITE_API_URL;
+
 const ProductDetails = () => {
   const { id } = useParams()
   const { addToCart } = useCart()
@@ -13,21 +14,25 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null)
   const [qty, setQty] = useState(1)
 
-useEffect(() => {
-  const fetchProduct = async () => {
-    try {
-      const { data } = await axios.get(`${API_URL}/products/${id}`)
-      setProduct(data)
-    } catch (err) {
-      console.log(err)
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const { data } = await axios.get(`${API_URL}/products/${id}`)
+        setProduct(data)
+      } catch (err) {
+        console.log(err)
+      }
     }
-  }
-  fetchProduct()
-}, [id])
+    fetchProduct()
+  }, [id])
 
   if(!product) return <Typography sx={{p:4}}>Loading...</Typography>
 
-  const imageUrl = `${API_URL.replace('/api', '')}${product.image.replace(/\\/g, '/')}`
+  // FIX: Full URL irundha adhe use pannu, illana backend URL add pannu
+  const imageUrl = product.image?.startsWith('http') 
+   ? product.image 
+    : `${API_URL.replace('/api', '')}${product.image.replace(/\\/g, '/')}`
+
   const addToCartHandler = () => {
     addToCart({...product, qty})
     toast.success(`${product.name} added to cart`)
@@ -40,7 +45,13 @@ useEffect(() => {
       
       <Grid container spacing={4} sx={{mt: 1}}>
         <Grid item md={6}>
-          <Box component="img" src={imageUrl} alt={product.name} sx={{width: '100%', borderRadius: 2}} />
+          <Box 
+            component="img" 
+            src={imageUrl} 
+            alt={product.name} 
+            sx={{width: '100%', borderRadius: 2}}
+            onError={(e) => e.target.src = 'https://placehold.co/500x500?text=No+Image'}
+          />
         </Grid>
 
         <Grid item md={3}>
@@ -55,8 +66,8 @@ useEffect(() => {
             <Typography variant="h5" sx={{mb: 2}}>₹{product.price}</Typography>
             <Typography sx={{mb: 2}}>
               <strong>Status:</strong> 
-              <Chip label={product.countInStock > 0 ? `In Stock` : 'Out Of Stock'} 
-                    color={product.countInStock > 0 ? 'success' : 'error'} size="small" sx={{ml:1}}/>
+              <Chip label={product.countInStock > 0? `In Stock` : 'Out Of Stock'} 
+                    color={product.countInStock > 0? 'success' : 'error'} size="small" sx={{ml:1}}/>
             </Typography>
 
             {product.countInStock > 0 && (
@@ -81,7 +92,7 @@ useEffect(() => {
               disabled={product.countInStock === 0}
               onClick={addToCartHandler}
             >
-              {product.countInStock === 0 ? 'OUT OF STOCK' : 'ADD TO CART'}
+              {product.countInStock === 0? 'OUT OF STOCK' : 'ADD TO CART'}
             </Button>
           </Box>
         </Grid>

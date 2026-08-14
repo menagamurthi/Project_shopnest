@@ -27,7 +27,12 @@ const ProductScreen = ({ addToCart }) => {
     <>
       <Link to='/'>Go Back</Link>
       <div style={{display: 'flex', gap: '2rem', marginTop: '1rem'}}>
-        <img src={product.image} alt={product.name} style={{width: '300px'}} />
+<img 
+  src={product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_API_URL}${product.image}`} 
+  alt={product.name}
+  style={{width: '400px', height: '400px', objectFit: 'cover'}}
+  onError={(e) => e.target.src = 'https://placehold.co/400x400?text=No+Image'}
+/>
         <div>
           <h2>{product.name}</h2>
           <p><strong>Brand:</strong> {product.brand}</p>
