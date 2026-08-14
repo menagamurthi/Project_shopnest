@@ -9,22 +9,21 @@ const getCategories = asyncHandler(async (req, res) => {
 
 // @desc    Fetch all products with Search + Filter
 const getProducts = asyncHandler(async (req, res) => {
-  const { keyword, category } = req.query;
-  let query = {};
-  console.log("Searching for:", { keyword, category })
+  const keyword = req.query.keyword ? { name: { $regex: req.query.keyword, $options: 'i' } } : {}
+  const category = req.query.category && req.query.category !== 'All' ? { category: req.query.category } : {}
 
-  if (keyword) {
-    query.$or = [
-      { name: { $regex: keyword, $options: 'i' } },
-      { category: { $regex: keyword, $options: 'i' } }
-    ]
-  }
-  if (category && category !== 'All') {
-    query.category = { $regex: `^${category}$`, $options: 'i' }
-  }
-  const products = await Product.find(query);
-  res.json(products);
-});
+  const products = await Product.find({ ...keyword, ...category })
+
+  // FIX: Old /uploads/ images ku full URL add pannu
+  const updatedProducts = products.map(product => {
+    if (product.image && !product.image.startsWith('http')) {
+      product.image = `https://shopnest-backend-urkd.onrender.com${product.image}`
+    }
+    return product
+  })
+
+  res.json(updatedProducts)
+})
 
 // @desc    Fetch single product
 // @route   GET /products/:id

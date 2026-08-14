@@ -8,14 +8,7 @@ const ProductCard = ({ product }) => {
 
   return (
     <Card sx={{ maxWidth: 345, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <CardMedia
-        component="img"
-        height="200"
-		image={`${import.meta.env.VITE_API_URL.replace('/api', '')}${product.image.replace(/\\/g, '/')}`} // ✅
-       
-        alt={product.name}
-        sx={{ objectFit: 'cover' }}
-      />
+       <img src={product.image} alt={product.name} />
       <CardContent sx={{ flexGrow: 1 }}>
         <Typography gutterBottom variant="h6">{product.name}</Typography>
         <Typography variant="body2" color="text.secondary">{product.category}</Typography>
