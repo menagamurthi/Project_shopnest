@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import axios from 'axios'
 import { toast } from 'react-toastify'
 import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Typography, Box } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { getProducts, deleteProduct } from '../../api' // <-- MUKKIYAM: api.js import
 
 const ProductListScreen = () => {
   const [products, setProducts] = useState([])
@@ -20,8 +18,7 @@ const ProductListScreen = () => {
 
   const fetchProducts = async () => {
     try {
-      // MUKKIYAM: /api add panniten
-      const { data } = await axios.get(`${API_URL}/api/products`)
+      const { data } = await getProducts() // <-- axios.get illa
       setProducts(data)
       setLoading(false)
     } catch (error) {
@@ -34,8 +31,8 @@ const ProductListScreen = () => {
   const deleteHandler = async (id) => {
     if (window.confirm('Are you sure?')) {
       try {
-        await axios.delete(`${API_URL}/api/products/${id}`)
-        toast.success('Product deleted')
+        await deleteProduct(id) // <-- api.js function use panniten
+        toast.success('Product removed')
         fetchProducts()
       } catch (error) {
         toast.error('Delete failed')
