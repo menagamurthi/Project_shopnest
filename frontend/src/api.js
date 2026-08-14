@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL?.trim(); // trim panni space remove
-
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: 'https://shopnest-backend-urkd.onrender.com', // Hardcoded
 });
 
 // Request ku munnadi token attach pannum
@@ -31,5 +29,7 @@ export const getProducts = (keyword = '', category = '') => {
   if (params.toString()) url += `?${params.toString()}`;
   return api.get(url);
 };
+
+export const getProductById = (id) => api.get(`/api/products/${id}`); // <-- idhuvum add pannu
 
 export default api;

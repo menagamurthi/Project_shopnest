@@ -27,21 +27,20 @@ const getProducts = asyncHandler(async (req, res) => {
 });
 
 // @desc    Fetch single product
-const getProductById = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id)
+// @route   GET /products/:id
+// @access  Public
+const getProductById = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id)
 
-    if (product) {
-      res.json(product)
-    } else {
-      res.status(404).json({ message: 'Product not found' })
-    }
-  } catch (error) {
-    res.status(404).json({ message: 'Product not found' })
+  if (product) {
+    res.json(product)
+  } else {
+    res.status(404)
+    throw new Error('Product not found')
   }
-}
+})
 
-// @desc    Create a product - Admin only. KEEP ONLY THIS ONE
+// @desc    Create a product - Admin only
 const createProduct = asyncHandler(async (req, res) => {
   const product = new Product({
     name: req.body.name || 'Sample Name',
@@ -58,9 +57,8 @@ const createProduct = asyncHandler(async (req, res) => {
 });
 
 // @desc    Update a product
-
 const updateProduct = asyncHandler(async (req, res) => {
-  const { name, price, description, image, brand, category, countInStock } = req.body // <-- MUST HAVE image
+  const { name, price, description, image, brand, category, countInStock } = req.body
 
   const product = await Product.findById(req.params.id)
 
@@ -68,7 +66,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.name = name
     product.price = price
     product.description = description
-    product.image = image // <-- MUST HAVE THIS LINE
+    product.image = image 
     product.brand = brand
     product.category = category
     product.countInStock = countInStock
@@ -91,11 +89,5 @@ const deleteProduct = asyncHandler(async (req, res) => {
     res.status(404).json({ message: 'Product not found' });
   }
 });
-import Product from '../models/productModel.js'
-
-// @desc    Fetch single product
-// @route   GET /api/products/:id
-// @access  Public
-
 
 export { getProducts, getProductById, createProduct, updateProduct, deleteProduct, getCategories };
