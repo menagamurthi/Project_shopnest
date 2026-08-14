@@ -1,6 +1,6 @@
 {
   "installCommand": "npm install",
-  "buildCommand": "node node_modules/vite/bin/vite.js build",
+  "buildCommand": "npm install react-router-dom && node node_modules/vite/bin/vite.js build",
   "env": {
     "NPM_CONFIG_PRODUCTION": "false"
   }
