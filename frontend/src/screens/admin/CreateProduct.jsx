@@ -28,7 +28,7 @@ export default function CreateProduct() {
     setUploading(true);
 
     try {
-      const { data } = await API.post('/api/upload', formData, {
+      const { data } = await API.post('/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -48,7 +48,7 @@ export default function CreateProduct() {
     e.preventDefault();
     setLoading(true);
     try {
-      await API.post('/api/products', {
+      await API.post('/products', {
         name, price, image, brand, category, description, countInStock
       });
       toast.success('Product Created');

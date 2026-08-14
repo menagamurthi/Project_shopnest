@@ -19,14 +19,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const { data } = await API.post('/api/users/login', { email, password }); // /api ADD PANNITEN
+    const { data } = await API.post('/users/login', { email, password }); // /api ADD PANNITEN
     localStorage.setItem('userInfo', JSON.stringify(data));
     setUserInfo(data);
     return data;
   };
 
   const register = async (name, email, password) => { 
-    const { data } = await API.post('/api/users/register', { name, email, password }); // /api ADD PANNITEN
+    const { data } = await API.post('/users/register', { name, email, password }); // /api ADD PANNITEN
     localStorage.setItem('userInfo', JSON.stringify(data));
     setUserInfo(data);
     return data;
