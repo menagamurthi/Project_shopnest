@@ -4,13 +4,12 @@ const api = axios.create({
   baseURL: 'https://shopnest-backend-urkd.onrender.com/api', // <-- /api add panniten
 });
 
-// Request ku munnadi token attach pannum
-api.interceptors.request.use((req) => {
+api.interceptors.request.use((config) => {
   const userInfo = localStorage.getItem('userInfo');
   if (userInfo) {
-    req.headers.Authorization = `Bearer ${JSON.parse(userInfo).token}`;
+    config.headers.Authorization = `Bearer ${JSON.parse(userInfo).token}`;
   }
-  return req;
+  return config;
 });
 
 // Auth functions
