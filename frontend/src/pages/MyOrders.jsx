@@ -3,6 +3,7 @@ import { Container, Typography, Paper, Box, Chip, CircularProgress, Grid, Button
 import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { toast } from 'react-toastify';
+import API from '../api';
 
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
@@ -11,21 +12,31 @@ export default function MyOrders() {
 
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
-  const fetchOrders = async () => {
-    if(!userInfo) return navigate('/login');
+const fetchOrders = async () => {
+  if(!userInfo) return navigate('/login');
+  try {
+    setLoading(true);
+    const { data } = await API.get('/orders/myorders'); // FIX
+    setOrders(data);
+  } catch(err) {
+    toast.error('Failed to load orders')
+  } finally {
+    setLoading(false);
+  }
+};
+
+const cancelOrderHandler = async (id) => {
+  if(window.confirm('Are you sure you want to cancel this order?')){
     try {
-      setLoading(true);
-      const res = await fetch('http://localhost:5000/api/orders/myorders', {
-        headers: { Authorization: `Bearer ${userInfo.token}` }
-      });
-      const data = await res.json();
-      setOrders(data);
+      await API.delete(`/orders/${id}`); // FIX
+      toast.success('Order Cancelled');
+      fetchOrders();
     } catch(err) {
-      toast.error('Failed to load orders')
-    } finally {
-      setLoading(false);
+      toast.error(err.message);
     }
-  };
+  }
+};
+ // CHANGE - need to import API
 
   useEffect(() => {
     fetchOrders();
@@ -34,10 +45,7 @@ export default function MyOrders() {
   const cancelOrderHandler = async (id) => {
     if(window.confirm('Are you sure you want to cancel this order?')){
       try {
-        const res = await fetch(`http://localhost:5000/api/orders/${id}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${userInfo.token}` }
-        });
+       const res = await API.delete(`/orders/${id}`); // CHANGE
         const data = await res.json();
         if(!res.ok) throw new Error(data.message);
         toast.success('Order Cancelled');

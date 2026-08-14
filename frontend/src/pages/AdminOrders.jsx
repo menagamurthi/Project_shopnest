@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Container, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Select, MenuItem, Button, CircularProgress, Alert, Chip } from '@mui/material';
 import { Link } from 'react-router-dom';
+import API from '../api'; // ADD
+
+
+ // CHANGE
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -11,24 +15,22 @@ const AdminOrders = () => {
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-        const { data } = await axios.get('http://localhost:5000/api/orders', config);
-        setOrders(data);
-        setLoading(false);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to fetch orders');
-        setLoading(false);
-      }
-    };
-    if(userInfo) fetchOrders();
-  }, []);
+const fetchOrders = async () => {
+  try {
+    const { data } = await API.get('/orders'); // ✅ NO config needed
+    setOrders(data);
+    setLoading(false);
+  } catch (err) {
+    setError(err.response?.data?.message || 'Failed to fetch orders');
+    setLoading(false);
+  }
+};
 
   const updateOrderStatus = async (id, status) => {
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.put(`http://localhost:5000/api/orders/${id}`, { status }, config);
+	  await API.put(`/orders/${id}`, { status });
+      //await axios.put(`http://localhost:5000/api/orders/${id}`, { status }, config);
       setOrders(orders.map(o => o._id === id ? {...o, status} : o));
     } catch (err) {
       alert('Failed to update status');

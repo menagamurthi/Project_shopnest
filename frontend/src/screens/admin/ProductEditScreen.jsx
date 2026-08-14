@@ -5,6 +5,12 @@ import { TextField, Button, Box, Typography, Paper, Container } from '@mui/mater
 import { ArrowBack } from '@mui/icons-material'
 import { toast } from 'react-toastify'
 import { useAuth } from "../../context/AuthContext";
+import API from '../api'; // ADD TOP
+
+
+// Get
+
+
 
 const ProductEditScreen = () => {
   const { id: productId } = useParams()
@@ -23,7 +29,7 @@ const ProductEditScreen = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data } = await axios.get(`/api/products/${productId}`)
+        const { data } = await API.get(`/products/${productId}`)
         setName(data.name)
         setPrice(data.price)
         setImage(data.image)
@@ -39,24 +45,18 @@ const ProductEditScreen = () => {
     fetchProduct()
   }, [productId])
 
-  const submitHandler = async (e) => {
-    e.preventDefault()
-    try {
-      const config = {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userInfo.token}` 
-        }
-      }
-      await axios.put(`/api/products/${productId}`, {
-        name, price, image, brand, category, countInStock, description // <-- brand added
-      }, config)
-      toast.success('Product Updated')
-      navigate('/admin/products')
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Update failed')
-    }
+const submitHandler = async (e) => {
+  e.preventDefault()
+  try {
+    await API.put(`/products/${productId}`, { 
+      name, price, image, brand, category, countInStock, description 
+    })
+    toast.success('Product Updated')
+    navigate('/admin/products')
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Update failed')
   }
+}
 
   if(loading) return <h2>Loading...</h2>
 

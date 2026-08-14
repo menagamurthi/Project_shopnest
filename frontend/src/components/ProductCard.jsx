@@ -11,7 +11,8 @@ const ProductCard = ({ product }) => {
       <CardMedia
         component="img"
         height="200"
-        image={`http://localhost:5000${product.image.replace(/\\/g, '/')}`}
+		image={`${import.meta.env.VITE_API_URL.replace('/api', '')}${product.image.replace(/\\/g, '/')}`} // ✅
+       
         alt={product.name}
         sx={{ objectFit: 'cover' }}
       />

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { toast } from 'react-toastify'
 import { Container, Typography, TextField, Button, Box, Paper } from '@mui/material'
+import API from '../api';
 
 const CheckoutPage = () => {
   const [address, setAddress] = useState('')
@@ -37,33 +38,21 @@ const CheckoutPage = () => {
     }))
 
     try {
-      const token = JSON.parse(localStorage.getItem('userInfo'))?.token
-      if(!token) throw new Error('Please login first')
-
-      const res = await fetch('http://localhost:5000/api/orders', { // <-- FIX: full URL
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          orderItems,
-          shippingAddress,
-          paymentMethod: "COD",
-          itemsPrice,
-          taxPrice,
-          shippingPrice,
-          totalPrice
-        })
-      })
-      const data = await res.json()
-      if(!res.ok) throw new Error(data.message)
+      const { data } = await API.post('/orders', { // ✅ USE API, NO token manually
+        orderItems,
+        shippingAddress,
+        paymentMethod: "COD",
+        itemsPrice,
+        taxPrice,
+        shippingPrice,
+        totalPrice
+      });
 
       clearCart()
       toast.success('Order Placed Successfully!')
       navigate(`/order/${data._id}`)
     } catch (err) {
-      toast.error(err.message)
+      toast.error(err.response?.data?.message || err.message)
     }
     setLoading(false)
   }

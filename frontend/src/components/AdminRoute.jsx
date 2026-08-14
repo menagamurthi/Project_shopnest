@@ -4,12 +4,13 @@ import { AuthContext } from '../context/AuthContext'; // change path if differen
 
 const AdminRoute = () => {
   const { userInfo, loading } = useContext(AuthContext);
-
+const isAdmin = userInfo?.isAdmin || userInfo?.user?.isAdmin
   if (loading) {
     return <h2>Loading...</h2> // <-- ADD THIS to stop blinking
   }
 
-  return userInfo && userInfo.isAdmin ? <Outlet /> : <Navigate to='/login' replace />;
+return userInfo && isAdmin ? <Outlet /> : <Navigate to='/login' replace />;
 };
+
 
 export default AdminRoute;

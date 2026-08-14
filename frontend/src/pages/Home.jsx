@@ -3,9 +3,11 @@ import axios from 'axios';
 import { Container, Grid, TextField, MenuItem, Typography, Box } from '@mui/material'
 import ProductCard from '../components/ProductCard'
 
+const API_URL = import.meta.env.VITE_API_URL; // <-- ADD THIS LINE
+
 const Home = () => {
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState(['All']); // <-- NEW
+  const [categories, setCategories] = useState(['All']);
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('All');
 
@@ -13,8 +15,9 @@ const Home = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data } = await axios.get('/api/products/categories')
-        setCategories(data)
+		  //fetch(`http://localhost:5000/api/products/${id}`)
+        const { data } = await axios.get(`${API_URL}/products/categories`) // <-- CHANGED
+        setCategories(['All', ...data]) // Add 'All' option
       } catch (error) {
         console.log(error);
       }
@@ -26,7 +29,8 @@ const Home = () => {
     const fetchProducts = async () => {
       try {
         const { data } = await axios.get(
-          `/api/products?keyword=${keyword}&category=${category}`
+		//fetch(`http://localhost:5000/api/products/${id}`)
+          `${API_URL}/products?keyword=${keyword}&category=${category}` // <-- CHANGED
         );
         setProducts(data);
       } catch (error) {
@@ -55,7 +59,7 @@ const Home = () => {
           onChange={(e) => setCategory(e.target.value)}
           sx={{ minWidth: 200 }}
         >
-          {categories.map(cat => ( // <-- LOOP FROM DB
+          {categories.map(cat => (
             <MenuItem key={cat} value={cat}>{cat}</MenuItem>
           ))}
         </TextField>

@@ -4,7 +4,7 @@ import axios from 'axios'
 import { TextField, Button, Box, Typography, Paper, Container } from '@mui/material'
 import { ArrowBack } from '@mui/icons-material'
 import { toast } from 'react-toastify'
-
+import API from '../api'; // ADD TOP
 const ProductCreateScreen = () => {
   const [name, setName] = useState('')
   const [price, setPrice] = useState(0)
@@ -15,6 +15,9 @@ const ProductCreateScreen = () => {
   const [uploading, setUploading] = useState(false) // ADD THIS
   const navigate = useNavigate()
 
+
+
+
   // MOVE THIS INSIDE THE COMPONENT
   const uploadFileHandler = async (e) => {
     const file = e.target.files[0]
@@ -23,9 +26,11 @@ const ProductCreateScreen = () => {
     setUploading(true)
 
     try {
-      const { data } = await axios.post('/api/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
+// Upload
+const { data } = await API.post('/upload', formData, {
+  headers: { 'Content-Type': 'multipart/form-data' }
+})
+
       setImage(data) // sets /uploads/image-xxx.jpg
       setUploading(false)
       toast.success('Image Uploaded')
@@ -37,9 +42,8 @@ const ProductCreateScreen = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault()
-    await axios.post(`/api/products`, { 
-      name, price, image, category, description, countInStock 
-    })
+// Create
+await API.post(`/products`, { name, price, image, category, description, countInStock })
     toast.success('Product Created')
     navigate('/admin/products')
   }
@@ -69,7 +73,7 @@ const ProductCreateScreen = () => {
     <Typography variant="caption" display="block" gutterBottom>Preview:</Typography>
     <Paper sx={{p:1, display: 'inline-block'}}>
       <img 
-        src={`http://localhost:5000${image}`} 
+        src={`${import.meta.env.VITE_API_URL.replace('/api', '')}${image}`} // FIX 
         alt="preview" 
         style={{width: '150px', height: '150px', objectFit: 'cover', borderRadius: '8px'}} 
       />
