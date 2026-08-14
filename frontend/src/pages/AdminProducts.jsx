@@ -73,9 +73,9 @@ await API.delete(`/products/${id}`);
     <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Products</h1>
-        <button onClick={createProductHandler} style={{ padding: '10px 15px', cursor: 'pointer', background: '#007bff', color: 'white', border: 'none', borderRadius: '5px' }}>
-          + Create Product
-        </button>
+       <Button onClick={() => navigate('/admin/product/create')}>
+  Create Product
+</Button>>
       </div>
 
       <table style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>

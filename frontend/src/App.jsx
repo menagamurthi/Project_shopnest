@@ -23,6 +23,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import ProductCreateScreen from './screens/admin/ProductCreateScreen';
 import ProductEditScreen from './screens/admin/ProductEditScreen';
 import ProductListScreen from './screens/admin/ProductListScreen';
+import CreateProduct from './screen/admin/CreateProduct' // path note pannu: screen
+
 
 const AdminRoute = ({ children }) => {
   const { userInfo } = useAuth();
@@ -59,7 +61,8 @@ function App() {
           <Route path="/admin/products" element={<AdminRoute><ProductListScreen /></AdminRoute>} />
           <Route path='/admin/product/:id/edit' element={<AdminRoute><ProductEditScreen /></AdminRoute>} />
           <Route path='/admin/product/create' element={<AdminRoute><ProductCreateScreen /></AdminRoute>} />
-        </Routes>
+		  <Route path="/admin/product/create" element={<CreateProduct />} /></AdminRoute>} />		        
+	  </Routes>
       </ThemeProvider>
     </CartProvider>
   );

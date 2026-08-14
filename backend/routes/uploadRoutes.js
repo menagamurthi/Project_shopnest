@@ -1,9 +1,52 @@
-import express from 'express'
-import { upload } from '../middleware/uploadMiddleware.js'
-const router = express.Router()
+import express from 'express';
+import multer from 'multer';
+import { v2 as cloudinary } from 'cloudinary';
+import streamifier from 'streamifier'; // npm i streamifier
 
-router.post('/', upload.single('image'), (req, res) => {
-  res.send(`/${req.file.path}`) // returns /uploads/image-12345.jpg
-})
+const router = express.Router();
 
-export default router
+// Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Memory la store pannum - file ah disk la save panna vendam
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// POST /api/upload
+router.post('/', upload.single('image'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No image file' });
+  }
+
+  try {
+    // buffer ah cloudinary ku anupuvom
+    const streamUpload = (buffer) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "shopnest" }, // cloudinary la folder create aagum
+          (error, result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(error);
+            }
+          }
+        );
+        streamifier.createReadStream(buffer).pipe(stream);
+      });
+    };
+
+    const result = await streamUpload(req.file.buffer);
+    res.json({ image: result.secure_url }); // https://res.cloudinary.com/...jpg
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Upload failed' });
+  }
+});
+
+export default router;

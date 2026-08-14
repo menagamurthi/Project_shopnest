@@ -1,7 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
-import API from '../api'; // or '../api/axio' whichever you use
-
+import API from '../api'; // namma api.js file
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
@@ -14,22 +12,26 @@ export const AuthProvider = ({ children }) => {
     try {
       const item = localStorage.getItem('userInfo');
       if (item) setUserInfo(JSON.parse(item));
-    } catch {}
+    } catch (e) {
+      console.log(e)
+    }
     setLoading(false);
   }, []);
 
   const login = async (email, password) => {
-    const { data } = await API.post('/users/login', { email, password }); // ✅
+    const { data } = await API.post('/api/users/login', { email, password }); // /api ADD PANNITEN
     localStorage.setItem('userInfo', JSON.stringify(data));
     setUserInfo(data);
     return data;
   };
-const register = async (name, email, password) => { // <-- ADD THIS TOO
-    const { data } = await API.post('/users/register', { name, email, password });
+
+  const register = async (name, email, password) => { 
+    const { data } = await API.post('/api/users/register', { name, email, password }); // /api ADD PANNITEN
     localStorage.setItem('userInfo', JSON.stringify(data));
     setUserInfo(data);
     return data;
   };
+
   const logout = () => {
     localStorage.removeItem('userInfo');
     setUserInfo(null);
