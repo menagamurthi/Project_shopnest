@@ -4,7 +4,7 @@ import axios from 'axios'
 import { TextField, Button, Box, Typography, Paper, Container } from '@mui/material'
 import { ArrowBack } from '@mui/icons-material'
 import { toast } from 'react-toastify'
-import API from '../api'; // ADD TOP
+import API from '../../api'
 const ProductCreateScreen = () => {
   const [name, setName] = useState('')
   const [price, setPrice] = useState(0)
