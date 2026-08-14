@@ -1,39 +1,35 @@
 import express from 'express';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
-import streamifier from 'streamifier'; // npm i streamifier
+import streamifier from 'streamifier';
+import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Cloudinary config
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Memory la store pannum - file ah disk la save panna vendam
+// Memory la store
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // POST /api/upload
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', protect, admin, upload.single('image'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No image file' });
   }
 
   try {
-    // buffer ah cloudinary ku anupuvom
     const streamUpload = (buffer) => {
       return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
-          { folder: "shopnest" }, // cloudinary la folder create aagum
+          { folder: "shopnest" },
           (error, result) => {
-            if (result) {
-              resolve(result);
-            } else {
-              reject(error);
-            }
+            if (result) resolve(result);
+            else reject(error);
           }
         );
         streamifier.createReadStream(buffer).pipe(stream);

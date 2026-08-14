@@ -58,7 +58,7 @@ const createProduct = asyncHandler(async (req, res) => {
 
 // @desc    Update a product
 const updateProduct = asyncHandler(async (req, res) => {
-  const { name, price, description, image, brand, category, countInStock } = req.body
+  const { name, price, description, image, brand, category, countInStock } = req.body // image will be cloudinary url now
 
   const product = await Product.findById(req.params.id)
 
@@ -66,7 +66,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.name = name
     product.price = price
     product.description = description
-    product.image = image 
+    product.image = image // <-- Cloudinary URL will come here from frontend
     product.brand = brand
     product.category = category
     product.countInStock = countInStock

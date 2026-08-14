@@ -2,8 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -14,22 +12,24 @@ import orderRoutes from './routes/orderRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 
-
-
 dotenv.config();
-console.log("KEY:", process.env.RAZORPAY_KEY_ID);
 
 const app = express();
-app.use(cors());
+
+// CORS - Only once, before routes
+app.use(cors({
+  origin: 'https://project-shopnest.vercel.app', // un Vercel URL
+  credentials: true
+}));
 app.use(express.json());
 
 // FIX FOR ES MODULES
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// STATIC UPLOADS - ONLY ONCE
+// STATIC UPLOADS - Render la work aagathu, but local ku ok
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/images', express.static(path.join(__dirname, 'images')))
+
 app.get('/', (req, res) => res.send('API is running'));
 
 // ROUTES
@@ -37,9 +37,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
-app.use('/api/upload', uploadRoutes);
+app.use('/api/upload', uploadRoutes); // Cloudinary route
 
-// TEMP: Make user admin. DELETE AFTER USE
+// TEMP: Make user admin
 app.get('/api/makeadmin/:email', async (req, res) => {
   const user = await User.findOneAndUpdate(
     { email: req.params.email },

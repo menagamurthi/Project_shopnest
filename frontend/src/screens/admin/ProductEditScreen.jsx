@@ -1,30 +1,25 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import axios from 'axios'
-import { TextField, Button, Box, Typography, Paper, Container } from '@mui/material'
-import { ArrowBack } from '@mui/icons-material'
+import { TextField, Button, Box, Typography, Paper, Container, CircularProgress } from '@mui/material'
+import { ArrowBack, CloudUpload } from '@mui/icons-material'
 import { toast } from 'react-toastify'
 import { useAuth } from "../../context/AuthContext";
 import API from '../../api' // ADD TOP
 
-
-// Get
-
-
-
 const ProductEditScreen = () => {
   const { id: productId } = useParams()
   const navigate = useNavigate()
-  const { userInfo } = useAuth(); 
+  const { userInfo } = useAuth();
 
   const [name, setName] = useState('')
   const [price, setPrice] = useState(0)
   const [image, setImage] = useState('')
-  const [brand, setBrand] = useState('') // <-- ADDED THIS
+  const [brand, setBrand] = useState('')
   const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
   const [countInStock, setCountInStock] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false) // <-- ADDED
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -33,7 +28,7 @@ const ProductEditScreen = () => {
         setName(data.name)
         setPrice(data.price)
         setImage(data.image)
-        setBrand(data.brand) // <-- ADDED THIS
+        setBrand(data.brand)
         setCategory(data.category)
         setDescription(data.description)
         setCountInStock(data.countInStock)
@@ -45,18 +40,41 @@ const ProductEditScreen = () => {
     fetchProduct()
   }, [productId])
 
-const submitHandler = async (e) => {
-  e.preventDefault()
-  try {
-    await API.put(`/products/${productId}`, { 
-      name, price, image, brand, category, countInStock, description 
-    })
-    toast.success('Product Updated')
-    navigate('/admin/products')
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Update failed')
+  const uploadFileHandler = async (e) => { // <-- MOVED INSIDE COMPONENT
+    const file = e.target.files[0]
+    const formData = new FormData()
+    formData.append('image', file)
+    setUploading(true)
+
+    try {
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+      const { data } = await API.post('/upload', formData, config) // /api/upload
+      setImage(data.image) // Cloudinary URL set aagidum
+      setUploading(false)
+      toast.success('Image Uploaded')
+    } catch (error) {
+      console.error(error)
+      toast.error('Upload failed')
+      setUploading(false)
+    }
   }
-}
+
+  const submitHandler = async (e) => {
+    e.preventDefault()
+    try {
+      await API.put(`/products/${productId}`, {
+        name, price, image, brand, category, countInStock, description
+      })
+      toast.success('Product Updated')
+      navigate('/admin/products')
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Update failed')
+    }
+  }
 
   if(loading) return <h2>Loading...</h2>
 
@@ -70,8 +88,17 @@ const submitHandler = async (e) => {
         <Box component="form" onSubmit={submitHandler}>
           <TextField label="Name" fullWidth margin="normal" value={name} onChange={(e) => setName(e.target.value)} required />
           <TextField label="Price" type="number" fullWidth margin="normal" value={price} onChange={(e) => setPrice(e.target.value)} required />
+
           <TextField label="Image URL" fullWidth margin="normal" value={image} onChange={(e) => setImage(e.target.value)} />
-          <TextField label="Brand" fullWidth margin="normal" value={brand} onChange={(e) => setBrand(e.target.value)} /> {/* <-- ADDED THIS */}
+
+          {/* UPLOAD BUTTON ADD PANNITEN */}
+          <Button variant="outlined" component="label" startIcon={<CloudUpload />} disabled={uploading} sx={{mb: 2}}>
+            {uploading? <CircularProgress size={20}/> : 'Upload Image'}
+            <input type="file" hidden onChange={uploadFileHandler} />
+          </Button>
+          {image && <img src={image} alt="preview" style={{width: '100px', marginLeft: '10px'}}/>}
+
+          <TextField label="Brand" fullWidth margin="normal" value={brand} onChange={(e) => setBrand(e.target.value)} />
           <TextField label="Category" fullWidth margin="normal" value={category} onChange={(e) => setCategory(e.target.value)} />
           <TextField label="Count In Stock" type="number" fullWidth margin="normal" value={countInStock} onChange={(e) => setCountInStock(e.target.value)} />
           <TextField label="Description" multiline rows={3} fullWidth margin="normal" value={description} onChange={(e) => setDescription(e.target.value)} />
@@ -81,4 +108,5 @@ const submitHandler = async (e) => {
     </Container>
   )
 }
+
 export default ProductEditScreen
