@@ -1,5 +1,7 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "installCommand": "npm install",
+  "buildCommand": "vite build",
+  "env": {
+    "NPM_CONFIG_PRODUCTION": "false"
+  }
 }
