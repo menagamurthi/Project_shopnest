@@ -1,6 +1,6 @@
 {
   "installCommand": "npm install",
-  "buildCommand": "vite build",
+  "buildCommand": "chmod +x node_modules/.bin/vite && vite build",
   "env": {
     "NPM_CONFIG_PRODUCTION": "false"
   }
