@@ -16,7 +16,7 @@ const Home = () => {
     const fetchCategories = async () => {
       try {
 		  //fetch(`http://localhost:5000/api/products/${id}`)
-        const { data } = await axios.get(`${API_URL}/products/categories`) // <-- CHANGED
+        const { data } = await axios.get(`${API_URL}/api/products/categories`) // <-- CHANGED
         setCategories(['All', ...data]) // Add 'All' option
       } catch (error) {
         console.log(error);
@@ -30,7 +30,7 @@ const Home = () => {
       try {
         const { data } = await axios.get(
 		//fetch(`http://localhost:5000/api/products/${id}`)
-          `${API_URL}/products?keyword=${keyword}&category=${category}` // <-- CHANGED
+          `${API_URL}/api/products?keyword=${keyword}&category=${category}` // <-- CHANGED
         );
         setProducts(data);
       } catch (error) {
