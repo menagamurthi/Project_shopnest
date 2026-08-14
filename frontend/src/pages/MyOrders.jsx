@@ -3,7 +3,7 @@ import { Container, Typography, Paper, Box, Chip, CircularProgress, Grid, Button
 import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { toast } from 'react-toastify';
-import API from '../api';
+import API from '../api'; // Assuming you have axios instance here
 
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
@@ -12,49 +12,34 @@ export default function MyOrders() {
 
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
-const fetchOrders = async () => {
-  if(!userInfo) return navigate('/login');
-  try {
-    setLoading(true);
-    const { data } = await API.get('/orders/myorders'); // FIX
-    setOrders(data);
-  } catch(err) {
-    toast.error('Failed to load orders')
-  } finally {
-    setLoading(false);
-  }
-};
-
-const cancelOrderHandler = async (id) => {
-  if(window.confirm('Are you sure you want to cancel this order?')){
+  const fetchOrders = async () => {
+    if(!userInfo) return navigate('/login');
     try {
-      await API.delete(`/orders/${id}`); // FIX
-      toast.success('Order Cancelled');
-      fetchOrders();
+      setLoading(true);
+      const { data } = await API.get('/orders/myorders'); 
+      setOrders(data);
     } catch(err) {
-      toast.error(err.message);
+      toast.error('Failed to load orders')
+    } finally {
+      setLoading(false);
     }
-  }
-};
- // CHANGE - need to import API
-
-  useEffect(() => {
-    fetchOrders();
-  }, [navigate]);
+  };
 
   const cancelOrderHandler = async (id) => {
     if(window.confirm('Are you sure you want to cancel this order?')){
       try {
-       const res = await API.delete(`/orders/${id}`); // CHANGE
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.message);
+        await API.delete(`/orders/${id}`); 
         toast.success('Order Cancelled');
         fetchOrders(); // refresh list
       } catch(err) {
-        toast.error(err.message);
+        toast.error(err.response?.data?.message || err.message);
       }
     }
   };
+
+  useEffect(() => {
+    fetchOrders();
+  }, [navigate]);
 
   if (loading) return <Container sx={{ mt: 4, textAlign:'center' }}><CircularProgress /></Container>;
 

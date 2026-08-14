@@ -3,6 +3,14 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { Card, Row, Col } from "react-bootstrap";
 
+declare global {
+  interface ImportMeta {
+    readonly env?: {
+      readonly VITE_API_URL?: string;
+    };
+  }
+}
+
 interface Product {
   _id: string;
   name: string;
@@ -12,14 +20,23 @@ interface Product {
 
 const HomeScreen = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const { data } = await axios.get(`http://${import.meta.env.VITE_API_URL}/api/products`);
-      setProducts(data);
+      try {
+        const apiUrl = import.meta.env?.VITE_API_URL ?? "http://localhost:5000";
+        const { data } = await axios.get(`${apiUrl}/api/products`);
+        setProducts(data);
+      } catch (error) {
+        console.error(error);
+      }
+      setLoading(false);
     };
     fetchProducts();
   }, []);
+
+  if (loading) return <h2 className="text-center my-5">Loading...</h2>
 
   return (
     <>
@@ -27,23 +44,20 @@ const HomeScreen = () => {
       <Row>
         {products.map((product) => (
           <Col key={product._id} sm={12} md={6} lg={4} xl={3}>
-<Card className="my-3 p-3 rounded h-100">
-  <Link to={`/product/${product._id}`}>
-   <Card.Img src={product.image}  variant="top"  style={{height: '200px', objectFit: 'cover'}} />
-
-  </Link>
-  <Card.Body className="d-flex flex-column">
-    <Link to={`/product/${product._id}`}>
-      <Card.Title as="div">
-        <strong>{product.name}</strong>
-      </Card.Title>
-    </Link>
-    <Card.Text as="h3">₹{product.price}</Card.Text>
-    <Link to={`/product/${product._id}`} className="btn btn-dark w-100 mt-auto">
-      View Details
-    </Link>
-  </Card.Body>
-</Card>
+            <Card className="my-3 p-3 rounded h-100">
+              <Link to={`/product/${product._id}`}>
+                <Card.Img src={product.image} variant="top" style={{height: '200px', objectFit: 'cover'}} />
+              </Link>
+              <Card.Body className="d-flex flex-column">
+                <Link to={`/product/${product._id}`}>
+                  <Card.Title as="div"><strong>{product.name}</strong></Card.Title>
+                </Link>
+                <Card.Text as="h3">₹{product.price}</Card.Text>
+                <Link to={`/product/${product._id}`} className="btn btn-dark w-100 mt-auto">
+                  View Details
+                </Link>
+              </Card.Body>
+            </Card>
           </Col>
         ))}
       </Row>

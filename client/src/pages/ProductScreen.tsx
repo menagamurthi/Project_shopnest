@@ -14,18 +14,33 @@ interface Product {
 }
 
 const ProductScreen = () => {
-  const { id } = useParams()
+  const { id } = useParams<{id: string}>()
   const [product, setProduct] = useState<Product | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const { data } = await axios.get(`http://${import.meta.env.VITE_API_URL}/api/products/${id}`)
-      setProduct(data)
+      if (!id) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        const apiUrl = import.meta.env?.VITE_API_URL ?? 'http://localhost:5000'
+        const { data } = await axios.get(`${apiUrl}/api/products/${id}`)
+        setProduct(data)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
     }
+
     fetchProduct()
   }, [id])
 
-  if (!product) return <p className='text-center mt-10'>Loading...</p>
+  if (loading) return <p className='text-center mt-10'>Loading...</p>
+  if (!product) return <p className='text-center mt-10'>Product not found</p>
 
   return (
     <div>
@@ -38,9 +53,9 @@ const ProductScreen = () => {
           <p className='text-4xl font-bold text-green-600 my-4'>₹{product.price}</p>
           <p className='mb-4 text-gray-700'>{product.description}</p>
           <p className='mb-4 font-semibold'>Status: {product.countInStock > 0? 'In Stock' : 'Out of Stock'}</p>
-          <button 
+          <button
             disabled={product.countInStock === 0}
-            className='bg-yellow-400 w-full py-3 rounded-lg font-bold text-lg hover:bg-yellow-500 disabled:bg-gray-300'
+            className='bg-yellow-400 w-full py-3 rounded-lg font-bold text-lg hover:bg-yellow-500 disabled:bg-gray-300 disabled:cursor-not-allowed'
           >
             Add to Cart
           </button>

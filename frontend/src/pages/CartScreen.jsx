@@ -22,9 +22,12 @@ const CartScreen = () => {
               {cartItems.map((item) => (
                 <Box key={item._id} sx={{p: 2}}>
                   <Grid container alignItems="center" spacing={2}>
-                    <Grid item md={2}>
-                      <CardMedia component="img" image={`${import.meta.env.VITE_API_URL.replace('/api', '')}${item.image.replace(/\\/g, '/')}`} // CHANGE />
-                    </Grid>
+                   <Grid item md={2}>
+  <CardMedia 
+    component="img" 
+    image={`${import.meta.env.VITE_API_URL.replace('/api', '')}${item.image.replace(/\\/g, '/')}`} 
+  />
+</Grid>
                     <Grid item md={3}>
                       <Link to={`/product/${item._id}`}>{item.name}</Link>
                     </Grid>

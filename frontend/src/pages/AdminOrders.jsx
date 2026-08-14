@@ -15,16 +15,18 @@ const AdminOrders = () => {
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
   useEffect(() => {
-const fetchOrders = async () => {
-  try {
-    const { data } = await API.get('/orders'); // ✅ NO config needed
-    setOrders(data);
-    setLoading(false);
-  } catch (err) {
-    setError(err.response?.data?.message || 'Failed to fetch orders');
-    setLoading(false);
-  }
-};
+    const fetchOrders = async () => {
+      try {
+        const { data } = await API.get('/orders'); // ✅ NO config needed
+        setOrders(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to fetch orders');
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, []);
 
   const updateOrderStatus = async (id, status) => {
     try {
@@ -96,6 +98,5 @@ const fetchOrders = async () => {
       </TableContainer>
     </Container>
   );
-};
-
+}
 export default AdminOrders;
