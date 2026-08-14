@@ -1,5 +1,5 @@
 import React from 'react'; 
-import { Routes, Route } from 'react-router-dom'; // REMOVED Navigate
+import { Routes, Route } from 'react-router-dom';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import Navbar from './components/Navbar'; 
 import { ToastContainer } from 'react-toastify';
@@ -16,17 +16,18 @@ import ProductDetails from './pages/ProductDetails';
 import MyOrders from './pages/MyOrders';
 import OrderDetails from './pages/OrderDetails';
 import CheckoutPage from './pages/CheckoutPage'; 
-import AdminOrders from './pages/AdminOrders' 
-import AdminProducts from './pages/AdminProducts' 
-import AdminDashboard from './pages/AdminDashboard'
-import ProductEditScreen from './screens/admin/ProductEditScreen';
+import AdminOrders from './pages/AdminOrders'; 
+import AdminDashboard from './pages/AdminDashboard';
 
+// Admin Screens
+import ProductCreateScreen from './screens/admin/ProductCreateScreen';
+import ProductEditScreen from './screens/admin/ProductEditScreen';
+import ProductListScreen from './screens/admin/ProductListScreen';
 
 const AdminRoute = ({ children }) => {
   const { userInfo } = useAuth();
   const isAdmin = userInfo?.user?.isAdmin || userInfo?.isAdmin;
   
-  // NO REDIRECT. JUST SHOW OR HIDE
   if (!userInfo) return <div style={{padding:20}}>Please Login First</div>;
   if (!isAdmin) return <div style={{padding:20}}>Not Admin</div>;
   
@@ -51,10 +52,13 @@ function App() {
           <Route path='/checkout' element={<CheckoutPage />} />
           <Route path="/order/:id" element={<OrderDetails />} />
           <Route path="/myorders" element={<MyOrders />} />
+          
+          {/* Admin Routes - ellathukum AdminRoute podanum */}
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />		  
-		  <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
-          <Route path="/admin/product/:id/edit" element={<AdminRoute><ProductEditScreen /></AdminRoute>} />
+          <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
+          <Route path="/admin/products" element={<AdminRoute><ProductListScreen /></AdminRoute>} />
+          <Route path='/admin/product/:id/edit' element={<AdminRoute><ProductEditScreen /></AdminRoute>} />
+          <Route path='/admin/product/create' element={<AdminRoute><ProductCreateScreen /></AdminRoute>} />
         </Routes>
       </ThemeProvider>
     </CartProvider>
