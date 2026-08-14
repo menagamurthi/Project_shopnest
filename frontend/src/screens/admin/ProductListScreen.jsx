@@ -34,7 +34,7 @@ const ProductListScreen = () => {
   const deleteHandler = async (id) => {
     if (window.confirm('Are you sure?')) {
       try {
-        await axios.delete(`${API_URL}/api/api/products/${id}`)
+        await axios.delete(`${API_URL}/api/products/${id}`)
         toast.success('Product deleted')
         fetchProducts()
       } catch (error) {

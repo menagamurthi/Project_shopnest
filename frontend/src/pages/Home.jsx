@@ -1,61 +1,64 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Container, Grid, TextField, MenuItem, Typography, Box } from '@mui/material'
+import { Container, Grid, TextField, MenuItem, Typography, Box, CircularProgress } from '@mui/material'
 import ProductCard from '../components/ProductCard'
 
-const API_URL = import.meta.env.VITE_API_URL; // <-- ADD THIS LINE
+// TRIM panniten - space irundhum work aagum
+const API_URL = import.meta.env.VITE_API_URL?.trim();
 
 const Home = () => {
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState(['All']);
+  const [categories] = useState(['All', 'Electronics', 'Shoes', 'Clothing', 'Kids']);
   const [keyword, setKeyword] = useState('');
   const [category, setCategory] = useState('All');
+  const [loading, setLoading] = useState(true);
 
-  // Fetch categories from DB on load
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-		  //fetch(`http://localhost:5000/api/products/${id}`)
-        const { data } = await axios.get(`${API_URL}/api/products/categories`) // <-- CHANGED
-        setCategories(['All', ...data]) // Add 'All' option
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchCategories();
-  }, []);
+  const fetchProducts = useCallback(async () => {
+    try {
+      setLoading(true);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const { data } = await axios.get(
-		//fetch(`http://localhost:5000/api/products/${id}`)
-          `${API_URL}/api/products?keyword=${keyword}&category=${category}` // <-- CHANGED
-        );
-        setProducts(data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchProducts();
+      let url = `${API_URL}/api/products`;
+      const params = new URLSearchParams();
+
+      if (keyword) params.append('keyword', keyword);
+      if (category!== 'All') params.append('category', category);
+
+      if (params.toString()) url += `?${params.toString()}`;
+
+      console.log("Fetching:", url); // idha F12 la paaru
+      const { data } = await axios.get(url);
+      setProducts(data);
+    } catch (error) {
+      console.log("API Error:", error);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
   }, [keyword, category]);
+
+  // Debounce with actual fetch call
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      fetchProducts();
+    }, 500);
+    return () => clearTimeout(delayDebounce);
+  }, [fetchProducts]);
 
   return (
     <Container sx={{ py: 4 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>Products</Typography>
-      
-      {/* SEARCH + FILTER */}
-      <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
-        <TextField 
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>Products</Typography>
+
+      <Box sx={{ display: 'flex', gap: 2, mb: 4, flexDirection: {xs: 'column', sm: 'row'} }}>
+        <TextField
           fullWidth
-          label="Search products..." 
+          label="Search products..."
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <TextField 
+        <TextField
           select
           label="Category"
-          value={category} 
+          value={category}
           onChange={(e) => setCategory(e.target.value)}
           sx={{ minWidth: 200 }}
         >
@@ -65,18 +68,21 @@ const Home = () => {
         </TextField>
       </Box>
 
-      {/* PRODUCT GRID */}
-      <Grid container spacing={3}>
-        {products.length === 0 ? (
-          <Typography sx={{ml: 2}}>No products found</Typography>
-        ) : (
-          products.map(product => (
+      {loading? (
+        <Box sx={{display: 'flex', justifyContent: 'center', mt: 5}}>
+          <CircularProgress />
+        </Box>
+      ) : products.length === 0? (
+        <Typography sx={{ml: 2, mt: 4}}>No products found</Typography>
+      ) : (
+        <Grid container spacing={3}>
+          {products.map(product => (
             <Grid item key={product._id} xs={12} sm={6} md={4} lg={3}>
               <ProductCard product={product} />
             </Grid>
-          ))
-        )}
-      </Grid>
+          ))}
+        </Grid>
+      )}
     </Container>
   )
 }
