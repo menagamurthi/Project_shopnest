@@ -23,8 +23,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ProductCreateScreen from './screens/admin/ProductCreateScreen';
 import ProductEditScreen from './screens/admin/ProductEditScreen';
 import ProductListScreen from './screens/admin/ProductListScreen';
-import CreateProduct from './screen/admin/CreateProduct' // path note pannu: screen
-
+import CreateProduct from './screens/admin/CreateProduct' // <-- screenS nu correct panniten
 
 const AdminRoute = ({ children }) => {
   const { userInfo } = useAuth();
@@ -55,13 +54,13 @@ function App() {
           <Route path="/order/:id" element={<OrderDetails />} />
           <Route path="/myorders" element={<MyOrders />} />
           
-          {/* Admin Routes - ellathukum AdminRoute podanum */}
+          {/* Admin Routes */}
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
           <Route path="/admin/products" element={<AdminRoute><ProductListScreen /></AdminRoute>} />
           <Route path='/admin/product/:id/edit' element={<AdminRoute><ProductEditScreen /></AdminRoute>} />
           <Route path='/admin/product/create' element={<AdminRoute><ProductCreateScreen /></AdminRoute>} />
-		  <Route path="/admin/product/create" element={<CreateProduct />} /></AdminRoute>} />		        
+          {/* Duplicate route ah delete panniten */}
 	  </Routes>
       </ThemeProvider>
     </CartProvider>

@@ -27,10 +27,19 @@ const getProducts = asyncHandler(async (req, res) => {
 });
 
 // @desc    Fetch single product
-const getProductById = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id);
-  product ? res.json(product) : res.status(404).json({ message: 'Product not found' });
-});
+const getProductById = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id)
+
+    if (product) {
+      res.json(product)
+    } else {
+      res.status(404).json({ message: 'Product not found' })
+    }
+  } catch (error) {
+    res.status(404).json({ message: 'Product not found' })
+  }
+}
 
 // @desc    Create a product - Admin only. KEEP ONLY THIS ONE
 const createProduct = asyncHandler(async (req, res) => {
@@ -82,5 +91,11 @@ const deleteProduct = asyncHandler(async (req, res) => {
     res.status(404).json({ message: 'Product not found' });
   }
 });
+import Product from '../models/productModel.js'
+
+// @desc    Fetch single product
+// @route   GET /api/products/:id
+// @access  Public
+
 
 export { getProducts, getProductById, createProduct, updateProduct, deleteProduct, getCategories };
