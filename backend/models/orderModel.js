@@ -17,13 +17,17 @@ const orderSchema = new mongoose.Schema({
     postalCode: { type: String, required: true },
     country: { type: String, required: true },
   },
-  paymentMethod: { type: String, required: true },
+  paymentMethod: { 
+    type: String, 
+    required: true,
+    default: 'COD' // <-- Keep this
+  },
   paymentResult: { id: String, status: String, update_time: String, email_address: String },
   itemsPrice: { type: Number, required: true, default: 0.0 },
   taxPrice: { type: Number, required: true, default: 0.0 },
   shippingPrice: { type: Number, required: true, default: 0.0 },
   totalPrice: { type: Number, required: true, default: 0.0 },
-  isPaid: { type: Boolean, required: true, default: false },
+  isPaid: { type: Boolean, required: true, default: false }, // <-- Keep this
   paidAt: { type: Date },
   isDelivered: { type: Boolean, required: true, default: false },
   deliveredAt: { type: Date },

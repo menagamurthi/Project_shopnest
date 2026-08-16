@@ -1,11 +1,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://shopnest-backend-urkd.onrender.com/api',
-  withCredentials: true, // <-- CORS ku must
-});
+  baseURL: import.meta.env.VITE_API_URL + '/api',
+})
 
-// Ella request ku munadi token attach aagum
+// Token auto attach
 api.interceptors.request.use((config) => {
   const userInfo = localStorage.getItem('userInfo');
   if (userInfo) {
@@ -14,7 +13,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auth functions
+// Auth
 export const register = (name, email, password) => 
   api.post(`/users/register`, { name, email, password });
 
@@ -33,13 +32,13 @@ export const getProducts = (keyword = '', category = '') => {
 
 export const getProductById = (id) => api.get(`/products/${id}`);
 
-// Admin - Delete, Create, Update
+// Admin
 export const deleteProduct = (id) => api.delete(`/products/${id}`);
-export const createProduct = (product) => api.post(`/products`, product);
+export const createProduct = () => api.post(`/products`, {}); // <-- empty body anupuvom
 export const updateProduct = (id, product) => api.put(`/products/${id}`, product);
 
 // Orders
 export const getOrders = () => api.get(`/orders`);
 export const getMyOrders = () => api.get(`/orders/myorders`);
 
-export default api; // <-- oru export dhan
+export default api;

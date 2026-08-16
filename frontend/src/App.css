@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+body {
+  background-color: #f8f9fa;
+  font-family: 'Poppins', sans-serif;
+}
+
+.navbar {
+  background-color: #111 !important; /* Black navbar */
+}
+
+.btn-primary {
+  background-color: #ff6f00 !important; /* Orange button */
+  border-color: #ff6f00 !important;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.btn-outline-primary {
+  color: #111 !important;
+  border-color: #111 !important;
+  border-radius: 8px;
+}
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+body {
+  background-color: #f8f9fa;
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* Navbar Black */
+.navbar {
+  background-color: #111 !important;
+}
+
+/* Primary Button Orange */
+.btn-primary {
+  background-color: #ff6f00 !important;
+  border-color: #ff6f00 !important;
+  border-radius: 8px !important;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.btn-primary:hover {
+  background-color: #e65100 !important;
+  border-color: #e65100 !important;
+}
+
+/* Outline Button Black */
+.btn-outline-primary {
+  color: #111 !important;
+  border-color: #111 !important;
+  border-radius: 8px !important;
+  font-weight: 600;
+  text-transform: none;
+}

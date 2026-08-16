@@ -12,12 +12,14 @@ const getProducts = asyncHandler(async (req, res) => {
   const keyword = req.query.keyword ? { name: { $regex: req.query.keyword, $options: 'i' } } : {}
   const category = req.query.category && req.query.category !== 'All' ? { category: req.query.category } : {}
 
-  const products = await Product.find({ ...keyword, ...category })
+  const products = await Product.find({ ...keyword, ...category }).lean() // .lean() for faster
 
-  // FIX: Old /uploads/ images ku full URL add pannu
+  // FIX: /uploads/ irundha mattum baseURL add pannu. http irundha adhe use pannu
+  const baseUrl = `${req.protocol}://${req.get('host')}` // http://localhost:5000
+
   const updatedProducts = products.map(product => {
-    if (product.image && !product.image.startsWith('http')) {
-      product.image = `https://shopnest-backend-urkd.onrender.com${product.image}`
+    if (product.image && product.image.startsWith('/uploads')) {
+      product.image = `${baseUrl}${product.image}` // /uploads/xxx.jpg -> http://localhost:5000/uploads/xxx.jpg
     }
     return product
   })
@@ -26,12 +28,14 @@ const getProducts = asyncHandler(async (req, res) => {
 })
 
 // @desc    Fetch single product
-// @route   GET /products/:id
-// @access  Public
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id)
 
   if (product) {
+    // single product ku also same fix
+    if (product.image && product.image.startsWith('/uploads')) {
+      product.image = `${req.protocol}://${req.get('host')}${product.image}`
+    }
     res.json(product)
   } else {
     res.status(404)
@@ -48,7 +52,7 @@ const createProduct = asyncHandler(async (req, res) => {
     description: req.body.description || 'Sample description',
     countInStock: req.body.countInStock || 0,
     brand: req.body.brand || 'Sample Brand',
-    image: req.file ? `/uploads/${req.file.filename}` : '/images/sample.jpg',
+    image: req.file ? `/uploads/${req.file.filename}` : '/images/sample.jpg', // relative path mattum save pannu
     user: req.user._id,
   });
   const createdProduct = await product.save();
@@ -57,7 +61,7 @@ const createProduct = asyncHandler(async (req, res) => {
 
 // @desc    Update a product
 const updateProduct = asyncHandler(async (req, res) => {
-  const { name, price, description, image, brand, category, countInStock } = req.body // image will be cloudinary url now
+  const { name, price, description, image, brand, category, countInStock } = req.body
 
   const product = await Product.findById(req.params.id)
 
@@ -65,7 +69,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.name = name
     product.price = price
     product.description = description
-    product.image = image // <-- Cloudinary URL will come here from frontend
+    product.image = req.file ? `/uploads/${req.file.filename}` : image // file irundha adhu, illana frontend la irundhu vandha url
     product.brand = brand
     product.category = category
     product.countInStock = countInStock
@@ -89,4 +93,9 @@ const deleteProduct = asyncHandler(async (req, res) => {
   }
 });
 
-export { getProducts, getProductById, createProduct, updateProduct, deleteProduct, getCategories };
+const getProductCount = asyncHandler(async (req, res) => {
+  const count = await Product.countDocuments({})
+  res.json({ count })
+})
+
+export { getProducts, getProductById, createProduct, updateProduct, deleteProduct, getCategories ,getProductCount};

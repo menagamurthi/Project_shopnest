@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import API from '../api'; // namma api.js file
 
-const AuthContext = createContext();
+export const AuthContext = createContext(); // <-- HERE: add 'export'
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
@@ -19,14 +19,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const { data } = await API.post('/users/login', { email, password }); // /api ADD PANNITEN
+    const { data } = await API.post('/users/login', { email, password });
     localStorage.setItem('userInfo', JSON.stringify(data));
     setUserInfo(data);
     return data;
   };
 
   const register = async (name, email, password) => { 
-    const { data } = await API.post('/users/register', { name, email, password }); // /api ADD PANNITEN
+    const { data } = await API.post('/users/register', { name, email, password });
     localStorage.setItem('userInfo', JSON.stringify(data));
     setUserInfo(data);
     return data;

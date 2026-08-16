@@ -4,6 +4,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import streamifier from 'streamifier';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
+
 const router = express.Router();
 
 cloudinary.config({
@@ -43,6 +44,7 @@ router.post('/', protect, admin, upload.single('image'), async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Upload failed' });
   }
+  console.log('Cloud:', process.env.CLOUDINARY_CLOUD_NAME)
 });
 
 export default router;

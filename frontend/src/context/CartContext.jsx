@@ -1,47 +1,32 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext } from 'react';
+import { Provider, useDispatch, useSelector } from 'react-redux';
+import store from '../store/store';
+import { addItem, clearCart, removeItem, updateCartQty } from '../store/cartSlice';
 
-const CartContext = createContext()
-export const useCart = () => useContext(CartContext)
+const CartContext = createContext();
 
-export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState(
-    localStorage.getItem('cart')? JSON.parse(localStorage.getItem('cart')) : []
-  )
+export const CartProvider = ({ children }) => (
+  <Provider store={store}>{children}</Provider>
+);
 
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems))
-  }, [cartItems])
+export const useCart = () => {
+  const dispatch = useDispatch();
+  const cartItems = useSelector((state) => state.cart || []);
 
-  const addToCart = (item) => {
-    const exist = cartItems.find(x => x._id === item._id)
-    if(exist) {
-      setCartItems(cartItems.map(x => 
-        x._id === item._id && x.qty < x.countInStock 
-         ? {...x, qty: x.qty + 1} // <-- Always add +1
-          : x
-      ))
-    } else {
-      setCartItems([...cartItems, {...item, qty: 1}]) // <-- Always start with 1
-    }
-  }
+  const addToCart = (item) => dispatch(addItem(item));
+  const removeFromCart = (id) => dispatch(removeItem(id));
+  const updateQty = (id, qty) => dispatch(updateCartQty({ id, qty }));
+  const resetCart = () => dispatch(clearCart());
 
-  const removeFromCart = (id) => {
-    setCartItems(cartItems.filter(x => x._id!== id))
-  }
+  return {
+    cartItems,
+    addToCart,
+    removeFromCart,
+    updateQty,
+    clearCart: resetCart,
+    cartCount: cartItems.reduce((total, item) => total + Number(item.qty || 0), 0),
+    cartTotal: cartItems.reduce((total, item) => total + Number(item.qty || 0) * Number(item.price || 0), 0),
+  };
+};
 
-  const updateQty = (id, qty) => { // <-- NEW: for dropdown
-    setCartItems(cartItems.map(x => 
-      x._id === id? {...x, qty: Number(qty)} : x
-    ))
-  }
-
-  const cartCount = cartItems.reduce((a, c) => a + c.qty, 0)
-  const cartTotal = cartItems.reduce((a, c) => a + c.qty * c.price, 0)
-  const clearCart = () => setCartItems([])
-
-  return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQty, cartCount, cartTotal, clearCart }}>
-      {children}
-    </CartContext.Provider>
-  )
-}
+export const useCartContext = () => useContext(CartContext);
